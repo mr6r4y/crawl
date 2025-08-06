@@ -1,0 +1,7 @@
+[requires]
+libcurl/8.12.1
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
