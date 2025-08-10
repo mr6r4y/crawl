@@ -1,5 +1,6 @@
 [requires]
 libcurl/8.12.1
+tidy-html5/5.8.0
 
 [generators]
 CMakeDeps

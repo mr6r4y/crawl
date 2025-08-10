@@ -1,17 +1,60 @@
 #include <stdlib.h>
+#include <argp.h>
 
-#include "curl/curl.h"
-#include "curl/curlver.h"
-#include "curl/easy.h"
-#include "curl/header.h"
-#include "curl/mprintf.h"
-#include "curl/multi.h"
-#include "curl/options.h"
-#include "curl/stdcheaders.h"
-#include "curl/system.h"
-#include "curl/typecheck-gcc.h"
+#include "crawl.c"
 
-int main(int argc, const char **argv)
+typedef struct Parameters_ {
+	int version;
+	char *url;
+} Parameters;
+
+static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
+	/* Get the input argument from argp_parse, which we
+	know is a pointer to our arguments structure. */
+	Parameters *arguments = state->input;
+	switch (key) {
+	case 'v':
+		arguments->version = 1;
+		break;
+	case ARGP_KEY_ARG:
+		if (state->arg_num >= 1)
+			/* Too many arguments. */
+			argp_usage(state);
+		arguments->url = arg;
+		break;
+	case ARGP_KEY_END:
+		if (state->arg_num < 1)
+			/* Not enough arguments. */
+			argp_usage(state);
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	Parameters params;
+	params.version = 0;
+	params.url = "";
+
+	int remaining = 0;
+	struct argp_option options[] = {
+		{ "version", 'v', 0, 0, "Print version string" },
+		{ 0 }
+	};
+	char *doc = "Crawl for content in default Apache directory listing";
+	char *args_doc = "URL";
+	struct argp argp = {
+		options,
+		parse_opt,
+		args_doc,
+		doc
+	};
+	argp_parse(&argp, argc, argv, 0, 0, &params);
+	printf("URL: %s\n", params.url);
+	url_validate(params.url);
 	return 0;
 }
