@@ -27,7 +27,7 @@ static size_t curl_write_clb_save_to_buffer(void *contents, size_t size, size_t 
 	mem->ptr = ptr;
 	memcpy(&(mem->ptr[mem->len]), contents, realsize);
 	mem->len += realsize;
-	mem->ptr[mem->len] = 0;
+	mem->ptr[mem->len] = '\0';
 
 	return realsize;
 }
@@ -36,6 +36,7 @@ bool url_fetch(char *url, StrSlice *buf)
 {
 	CURL *curl;
 	CURLcode res;
+	bool err = false;
 
 	buf->ptr = malloc(1); /* grown as needed by the realloc above */
 	buf->len = 0; /* no data at this point */
@@ -63,14 +64,22 @@ bool url_fetch(char *url, StrSlice *buf)
 		/* Perform the request, res gets the return code */
 		res = curl_easy_perform(curl);
 		/* Check for errors */
-		if (res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
+		if (res != CURLE_OK) {
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+			err = true;
+		}
 
 		/* always cleanup */
 		curl_easy_cleanup(curl);
+	} else {
+		err = true;
 	}
 	curl_global_cleanup();
 
+	return err;
+}
+
+bool html_get_uri(StrSlice content, char *uris[])
+{
 	return true;
 }
