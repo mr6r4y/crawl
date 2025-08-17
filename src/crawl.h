@@ -1,8 +1,12 @@
+#ifndef CRAWL_H
+#define CRAWL_H
+
 #include <stddef.h>
+#include <stdbool.h>
 
-typedef struct Buffer_ {
-  char *buf;
-  size_t size;
-} Buffer;
+#include "slice.h"
 
-int url_validate(char *url);
+bool url_validate(char *url);
+bool url_fetch(char *url, StrSlice *buf);
+
+#endif /* CRAWL_H */

@@ -1,7 +1,14 @@
 #include <stdlib.h>
 #include <argp.h>
 
+/*
+ * Unity build sources
+ * */
+#include "slice.c"
 #include "crawl.c"
+/*
+ * -------------------
+ */
 
 typedef struct Parameters_ {
 	int version;
@@ -36,11 +43,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 int main(int argc, char **argv)
 {
+	StrSlice fetch_buf;
 	Parameters params;
 	params.version = 0;
 	params.url = "";
 
 	int remaining = 0;
+
 	struct argp_option options[] = {
 		{ "version", 'v', 0, 0, "Print version string" },
 		{ 0 }
@@ -55,6 +64,16 @@ int main(int argc, char **argv)
 	};
 	argp_parse(&argp, argc, argv, 0, 0, &params);
 	printf("URL: %s\n", params.url);
-	url_validate(params.url);
-	return 0;
+
+	if (url_validate(params.url)) {
+		if (url_fetch(params.url, &fetch_buf)) {
+			printf("CONTENT:\n===================\n\n%s\n\n=========================\n", fetch_buf.ptr);
+		} else {
+			printf("Error: Cannot fetch URL: %s", params.url);
+		}
+	} else {
+		printf("Error: Invalid URL: %s", params.url);
+	}
+
+	return EXIT_SUCCESS;
 }

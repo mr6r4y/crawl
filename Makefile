@@ -14,18 +14,33 @@ venv:
 	virtualenv -p python3 venv/
 	source venv/bin/activate && pip3 install conan
 
-build: venv
+CMakeUserPresets.json: venv
 	source venv/bin/activate && conan profile detect --force
-	source venv/bin/activate && conan install . --output-folder=build --build=missing
-	cd build/ && cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 
-build/$(PROJECT_NAME): build
-	cd build/ && make
+build/Release: CMakeUserPresets.json venv
+	source venv/bin/activate && conan install . --settings=build_type=Release --build=missing
+
+build/Debug: CMakeUserPresets.json venv
+	source venv/bin/activate && conan install . --settings=build_type=Debug --build=missing
+
+build/Release/Makefile: build/Release
+	cd build/Release && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+
+build/Debug/Makefile: build/Debug
+	cd build/Debug && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug
+
+
+build/Debug/$(PROJECT_NAME): build/Debug/Makefile
+	cd build/Debug && make
+
+build/Release/$(PROJECT_NAME): build/Release/Makefile
+	cd build/Release && make
 
 clean: ## Clean all build artifacts
 	rm -rf build/
 	rm -rf venv/
 
 all: ## Build the whole thing
-	$(MAKE) build/$(PROJECT_NAME)
+	$(MAKE) build/Release/$(PROJECT_NAME)
+	$(MAKE) build/Debug/$(PROJECT_NAME)
 
