@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stddef.h>
 #include <argp.h>
 
 /*
@@ -65,15 +65,13 @@ int main(int argc, char **argv)
 	argp_parse(&argp, argc, argv, 0, 0, &params);
 	printf("URL: %s\n", params.url);
 
-	if (url_validate(params.url)) {
-		if (url_fetch(params.url, &fetch_buf)) {
+	if (url_validate(params.url))
+		if (url_fetch(params.url, &fetch_buf))
 			printf("CONTENT:\n===================\n\n%s\n\n=========================\n", fetch_buf.ptr);
-		} else {
+		else
 			printf("Error: Cannot fetch URL: %s", params.url);
-		}
-	} else {
+	else
 		printf("Error: Invalid URL: %s", params.url);
-	}
 
 	return EXIT_SUCCESS;
 }

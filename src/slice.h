@@ -2,7 +2,7 @@
 #define SLICE_H
 
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 typedef struct StrSlice_ {
   char *ptr;

@@ -1,5 +1,7 @@
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
 #include "tidy.h"
 #include "tidybuffio.h"
@@ -9,7 +11,31 @@
 
 bool url_validate(char *url)
 {
-	return true;
+	regex_t regex;
+	int reti;
+	char msgbuf[100];
+	bool match = false;
+
+	/* Compile regular expression */
+	if (regcomp(&regex, "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", REG_EXTENDED)) {
+		return false;
+	}
+
+	/* Execute regular expression */
+	reti = regexec(&regex, url, 0, NULL, 0);
+	if (!reti) {
+		match = true;
+	} else if (reti == REG_NOMATCH) {
+		match = false;
+	} else {
+		regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+		fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+	}
+
+	/* Free compiled regular expression if you want to use the regex_t again */
+	regfree(&regex);
+
+	return match;
 }
 
 static size_t curl_write_clb_save_to_buffer(void *contents, size_t size, size_t nmemb, void *userp)
@@ -36,7 +62,7 @@ bool url_fetch(char *url, StrSlice *buf)
 {
 	CURL *curl;
 	CURLcode res;
-	bool err = false;
+	bool success = true;
 
 	buf->ptr = malloc(1); /* grown as needed by the realloc above */
 	buf->len = 0; /* no data at this point */
@@ -66,17 +92,17 @@ bool url_fetch(char *url, StrSlice *buf)
 		/* Check for errors */
 		if (res != CURLE_OK) {
 			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-			err = true;
+			success = false;
 		}
 
 		/* always cleanup */
 		curl_easy_cleanup(curl);
 	} else {
-		err = true;
+		success = false;
 	}
 	curl_global_cleanup();
 
-	return err;
+	return success;
 }
 
 bool html_get_uri(StrSlice content, char *uris[])
