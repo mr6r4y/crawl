@@ -27,6 +27,6 @@ dap.configurations.c = {
 		name = "crawl-basic",
 
 		program = prg, -- This configuration will launch the current file if used
-		args = { "https://c-faq.com/decl/index.html" },
+		args = { "-o", "out/", "https://c-faq.com/decl/index.html" },
 	},
 }
