@@ -17,9 +17,11 @@ venv:
 CMakeUserPresets.json: venv
 	source venv/bin/activate && conan profile detect --force
 
+build/Release: export CMAKE_POLICY_VERSION_MINIMUM = 3.5
 build/Release: CMakeUserPresets.json venv
 	source venv/bin/activate && conan install . --settings=build_type=Release --build=missing
 
+build/Debug: export CMAKE_POLICY_VERSION_MINIMUM = 3.5
 build/Debug: CMakeUserPresets.json venv
 	source venv/bin/activate && conan install . --settings=build_type=Debug --build=missing
 
