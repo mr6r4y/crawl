@@ -24,17 +24,16 @@ build/Debug: CMakeUserPresets.json venv
 	source venv/bin/activate && conan install . --settings=build_type=Debug --build=missing
 
 build/Release/Makefile: build/Release
-	cd build/Release && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+	cmake --preset conan-release
 
 build/Debug/Makefile: build/Debug
-	cd build/Debug && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug
-
+	cmake --preset conan-debug
 
 build/Debug/$(PROJECT_NAME): build/Debug/Makefile
-	cd build/Debug && make
+	cmake --build --preset conan-debug
 
 build/Release/$(PROJECT_NAME): build/Release/Makefile
-	cd build/Release && make
+	cmake --build --preset conan-release
 
 clean: ## Clean all build artifacts
 	rm -rf build/
