@@ -50,8 +50,12 @@ int main(int argc, char **argv)
 {
 	StrSlice fetch_buf;
 	Parameters params;
+
+	/* Default arguments */
 	params.version = 0;
+	params.output_dir = "out";
 	params.url = "";
+	/* ----------------- */
 
 	int remaining = 0;
 
