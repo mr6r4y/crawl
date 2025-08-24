@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include "slice.h"
 
@@ -6,7 +7,7 @@ StrSlice slice_next_token(StrSlice *slice, char separator)
 	size_t i;
 	for (i = 0; i < slice->len; i++) {
 		if (slice->ptr[i] == separator) {
-			StrSlice result = { slice->ptr, i };
+			StrSlice result = { i, slice->ptr };
 			slice->ptr = slice->ptr + i + 1;
 			slice->len = slice->len - i - 1;
 			return result;
@@ -25,7 +26,42 @@ static inline bool slice_strcmp(StrSlice slice, const char *other)
 	return strncmp(slice.ptr, other, slice.len) == 0;
 }
 
-static inline StrSlice slice_from_string(const char *data)
+static inline StrSlice slice_from_string(char *data)
 {
-	return (StrSlice){ data, strlen(data) };
+	StrSlice result;
+
+	/* Include the '\0' terminating char */
+	result.len = strlen(data) + 1;
+	result.ptr = data;
+
+	return result;
+}
+
+static inline void array_init(StrArray *arr)
+{
+	arr->len = 0;
+	arr->alloc = 0;
+	arr->ptr = NULL;
+}
+
+static bool array_push(StrArray *arr, StrSlice item)
+{
+#define ARRAY_CHUNK 16
+	arr->len++;
+	if (arr->len > arr->alloc) {
+		arr->ptr = realloc(arr->ptr, (sizeof *arr->ptr) * (ARRAY_CHUNK + arr->alloc));
+		if (!arr->ptr)
+			return false;
+		arr->alloc += ARRAY_CHUNK;
+	}
+	arr->ptr[arr->len - 1] = item;
+	return true;
+}
+
+static inline StrSlice array_get(StrArray *arr, size_t n)
+{
+	if (arr->len > n)
+		return arr->ptr[n];
+	else
+		return (StrSlice){0};
 }

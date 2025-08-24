@@ -105,7 +105,13 @@ bool url_fetch(char *url, StrSlice *buf)
 	return success;
 }
 
-bool html_get_uri(StrSlice content, char *uris[])
+bool html_get_uri(StrSlice content, StrArray *uris)
 {
+	StrSlice curent_uri;
+
+	array_init(uris);
+
+	/* TO-DO: .. */
+
 	return true;
 }

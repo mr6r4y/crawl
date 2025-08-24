@@ -50,6 +50,7 @@ int main(int argc, char **argv)
 {
 	StrSlice fetch_buf;
 	Parameters params;
+	StrArray uris;
 
 	/* Default arguments */
 	params.version = 0;
@@ -58,6 +59,7 @@ int main(int argc, char **argv)
 	/* ----------------- */
 
 	int remaining = 0;
+	int i = 0;
 
 	struct argp_option options[] = {
 		{ "version", 'v', NULL, 0, "Print version string" },
@@ -77,9 +79,12 @@ int main(int argc, char **argv)
 	printf("Output-Dir: %s\n", params.output_dir);
 
 	if (url_validate(params.url))
-		if (url_fetch(params.url, &fetch_buf))
-			printf("CONTENT:\n===================\n\n%s\n\n=========================\n", fetch_buf.ptr);
-		else
+		if (url_fetch(params.url, &fetch_buf)) {
+			// printf("CONTENT:\n===================\n\n%s\n\n=========================\n", fetch_buf.ptr);
+			html_get_uri(fetch_buf, &uris);
+			for (i = 0; i < uris.len; i++)
+				printf("%d: %s\n", i, uris.ptr[i].ptr);
+		} else
 			printf("Error: Cannot fetch URL: %s", params.url);
 	else
 		printf("Error: Invalid URL: %s", params.url);
