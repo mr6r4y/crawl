@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "slice.h"
+#include "auxiliary.h"
 
 StrSlice slice_next_token(StrSlice *slice, char separator)
 {

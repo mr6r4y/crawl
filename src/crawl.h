@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "slice.h"
+#include "auxiliary.h"
 
 bool url_validate(char *url);
 bool url_fetch(char *url, StrSlice *buf);

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "slice.c"
+#include "auxiliary.c"
 
 int main()
 {

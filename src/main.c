@@ -5,7 +5,7 @@
 /*
  * Unity build sources
  * */
-#include "slice.c"
+#include "auxiliary.c"
 #include "crawl.c"
 /*
  * -------------------
