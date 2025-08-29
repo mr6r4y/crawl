@@ -58,10 +58,24 @@ static bool array_push(StrArray *arr, StrSlice item)
 	return true;
 }
 
-static inline StrSlice array_get(StrArray *arr, size_t n)
+static inline StrSlice array_get(StrArray *arr, size_t ind)
 {
-	if (arr->len > n)
-		return arr->ptr[n];
+	if (arr->len > ind)
+		return arr->ptr[ind];
 	else
 		return (StrSlice){0};
 }
+
+static inline void vec_init(Vec *vec)
+{
+	vec->len = 0;
+	vec->data[0] = '\0';
+}
+
+bool vec_data_set(Vec *vec, char *data, size_t data_len)
+{
+	/* TO-DO: .. */
+	return true;
+}
+
+

@@ -15,6 +15,25 @@ typedef struct StrArray_ {
   StrSlice *ptr;
 } StrArray;
 
+typedef enum VecType_ {
+  DB,
+  WORD,
+  DWORD,
+  QWORD,
+} VecType;
+
+typedef struct Vec_ {
+  size_t len;
+  VecType type;
+  char data[1];
+} Vec;
+
+typedef struct VecList_ {
+  size_t len;
+  size_t alloc;
+  Vec body[1];
+} VecList;
+
 StrSlice slice_next_token(StrSlice *slice, char separator);
 static inline bool slice_strcmp(StrSlice slice, const char *other);
 static inline StrSlice slice_from_string(char *data);
@@ -22,6 +41,9 @@ void slice_trim(StrSlice *slice);
 
 static inline void array_init(StrArray *arr);
 static bool array_push(StrArray *arr, StrSlice item);
-static inline StrSlice array_get(StrArray *arr, size_t n);
+static inline StrSlice array_get(StrArray *arr, size_t ind);
+
+static inline void vec_init(Vec *vec);
+bool vec_data_set(Vec *vec, char *data, size_t data_len);
 
 #endif
