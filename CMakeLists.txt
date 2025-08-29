@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(crawl C)
 
 set(CMAKE_C_STANDARD 90)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(CURL REQUIRED)
 find_package(tidy-html5 REQUIRED)
