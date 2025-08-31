@@ -36,4 +36,12 @@ dap.configurations.c = {
 
 		program = vim.fs.normalize("build/Debug/test-vec"), -- This configuration will launch the current file if used
 	},
+	{
+		-- The first three options are required by nvim-dap
+		type = "codelldb", -- the type here established the link to the adapter definition: `dap.adapters.python`
+		request = "launch",
+		name = "test-veclist",
+
+		program = vim.fs.normalize("build/Debug/test-veclist"), -- This configuration will launch the current file if used
+	},
 }
