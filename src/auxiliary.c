@@ -63,19 +63,21 @@ static inline StrSlice array_get(StrArray *arr, size_t ind)
 	if (arr->len > ind)
 		return arr->ptr[ind];
 	else
-		return (StrSlice){0};
+		return (StrSlice){ 0 };
 }
 
-static inline void vec_init(Vec *vec)
+bool vec_create(Vec **vec, char *data, size_t data_len)
 {
-	vec->len = 0;
-	vec->data[0] = '\0';
-}
+	Vec *v;
+	*vec = malloc(sizeof(*v) + data_len + 1);
 
-bool vec_data_set(Vec *vec, char *data, size_t data_len)
-{
-	/* TO-DO: .. */
+	v = *vec;
+	if (!v)
+		return false;
+
+	v->len = data_len;
+	v->type = DB;
+	memcpy(&(v->data), data, data_len);
+	v->data[data_len] = '\0';
 	return true;
 }
-
-

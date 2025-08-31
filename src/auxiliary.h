@@ -43,7 +43,9 @@ static inline void array_init(StrArray *arr);
 static bool array_push(StrArray *arr, StrSlice item);
 static inline StrSlice array_get(StrArray *arr, size_t ind);
 
-static inline void vec_init(Vec *vec);
-bool vec_data_set(Vec *vec, char *data, size_t data_len);
+/* Creates a Vec by malloc. Copies data to vec->data.
+ * When destroyed use free().
+*/
+bool vec_create(Vec **vec, char *data, size_t data_len);
 
 #endif

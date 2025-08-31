@@ -17,4 +17,5 @@ add_executable(${PROJECT_NAME} src/main.c)
 target_link_libraries(${PROJECT_NAME} CURL::libcurl)
 target_link_libraries(${PROJECT_NAME} tidy-html5::tidy-html5)
 
-add_executable(test-buffer test/test-slice.c)
+add_executable(test-slice test/test-slice.c)
+add_executable(test-vec test/test-vec.c)

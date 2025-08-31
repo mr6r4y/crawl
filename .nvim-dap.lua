@@ -17,8 +17,6 @@ dap.adapters.codelldb = function(cb, config)
 	})
 end
 
-local prg = vim.fs.normalize("build/Debug/crawl")
-
 dap.configurations.c = {
 	{
 		-- The first three options are required by nvim-dap
@@ -26,8 +24,16 @@ dap.configurations.c = {
 		request = "launch",
 		name = "crawl-basic",
 
-		program = prg, -- This configuration will launch the current file if used
+		program = vim.fs.normalize("build/Debug/crawl"), -- This configuration will launch the current file if used
 		-- args = { "-o", "out/", "https://c-faq.com/decl/index.html" },
 		args = { "https://c-faq.com/decl/index.html" },
+	},
+	{
+		-- The first three options are required by nvim-dap
+		type = "codelldb", -- the type here established the link to the adapter definition: `dap.adapters.python`
+		request = "launch",
+		name = "test-vec",
+
+		program = vim.fs.normalize("build/Debug/test-vec"), -- This configuration will launch the current file if used
 	},
 }
