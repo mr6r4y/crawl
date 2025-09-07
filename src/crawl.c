@@ -121,7 +121,7 @@ void node_traverse_href(TidyDoc doc, TidyNode tnod, VecList **hrefs, int depth)
 		if (name && strcmp("a", name) == 0) {
 			for (attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr))
 				if (strcmp("href", tidyAttrName(attr)) == 0) {
-					attr_value = tidyAttrValue(attr);
+					attr_value = (char *)tidyAttrValue(attr);
 					veclist_push_str(hrefs, attr_value);
 				}
 		}
@@ -130,7 +130,7 @@ void node_traverse_href(TidyDoc doc, TidyNode tnod, VecList **hrefs, int depth)
 	}
 }
 
-int html_get_uri(StrSlice content, VecList **hrefs)
+int html_get_href(StrSlice content, VecList **hrefs)
 {
 	veclist_init(hrefs, 512);
 
@@ -148,14 +148,10 @@ int html_get_uri(StrSlice content, VecList **hrefs)
 	tidyBufAppend(&docbuf, content.ptr, content.len);
 
 	err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
-	if (err >= 0) {
+	if (err >= 0)
 		err = tidyCleanAndRepair(tdoc); /* fix any problems */
-		if (err >= 0) {
-			err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
-			if (err >= 0)
-				node_traverse_href(tdoc, tidyGetRoot(tdoc), hrefs, 0); /* walk the tree */
-		}
-	}
+
+	node_traverse_href(tdoc, tidyGetRoot(tdoc), hrefs, 0); /* walk the tree */
 
 	/* clean-up */
 	tidyBufFree(&docbuf);
@@ -163,4 +159,32 @@ int html_get_uri(StrSlice content, VecList **hrefs)
 	tidyRelease(tdoc);
 
 	return err;
+}
+
+void href_download(char *url, char *href, char *outdir)
+{
+	size_t ulen;
+	Vec *v;
+
+	if (href[0] == '?')
+		return;
+
+	if (url[strlen(url) - 1] == '/') {
+		ulen = strlen(url) + strlen(href);
+		vec_create(&v, url, ulen);
+		strcat(v->data, href);
+	} else {
+		ulen = strlen(url) + strlen(href) + 1;
+		vec_create(&v, url, ulen);
+		strcat(v->data, "/");
+		strcat(v->data, href);
+	}
+
+	if (v->data[v->len - 1] == '/') {
+		// TO-DO: Recurse into new outdir
+		printf("Directory: %s\n", v->data);
+	} else {
+		// TO-DO: Download file
+		printf("File: %s\n", v->data);
+	}
 }

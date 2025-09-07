@@ -77,8 +77,9 @@ bool vec_create(Vec **vec, char *data, size_t data_len)
 		return false;
 
 	v->len = data_len;
-	v->type = DB;
-	memcpy(&(v->data), data, data_len);
+
+	if (data)
+		memcpy(&(v->data), data, data_len);
 	v->data[data_len] = '\0';
 	return true;
 }
@@ -122,7 +123,7 @@ static bool veclist_push_str(VecList **vec_list, char *str)
 	vl = *vec_list;
 	free = veclist_free_size(vl);
 	str_len = strlen(str);
-	vsize = sizeof(Vec) + str_len;
+	vsize = sizeof(Vec) + str_len + 1;
 
 	if (free < vsize) {
 		vl = realloc(vl, vl->alloc + vsize - free + 16);
@@ -133,9 +134,34 @@ static bool veclist_push_str(VecList **vec_list, char *str)
 	}
 	v = (Vec *)((uintptr_t)vl + vl->end);
 	v->len = str_len;
-	v->type = DB;
 	memcpy(&v->data, str, v->len);
 
+	v->data[v->len] = '\0';
+	vl->end += vec_size(v);
+	vl->len += 1;
+
+	return true;
+}
+
+static bool veclist_push_zero(VecList **vec_list, size_t size)
+{
+	VecList *vl;
+	Vec *v;
+	size_t free, vsize;
+
+	vl = *vec_list;
+	free = veclist_free_size(vl);
+	vsize = sizeof(Vec) + size + 1;
+
+	if (free < vsize) {
+		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		if (!vl)
+			return false;
+		*vec_list = vl;
+		vl->alloc += vsize - free + 16;
+	}
+	v = (Vec *)((uintptr_t)vl + vl->end);
+	v->len = size;
 	v->data[v->len] = '\0';
 	vl->end += vec_size(v);
 	vl->len += 1;

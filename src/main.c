@@ -51,6 +51,7 @@ int main(int argc, char **argv)
 	StrSlice fetch_buf;
 	Parameters params;
 	VecList *hrefs;
+	char *href;
 
 	/* Default arguments */
 	params.version = 0;
@@ -80,10 +81,13 @@ int main(int argc, char **argv)
 
 	if (url_validate(params.url))
 		if (url_fetch(params.url, &fetch_buf)) {
-			html_get_uri(fetch_buf, &hrefs);
+			html_get_href(fetch_buf, &hrefs);
 			/* Hrefs in VecList */
-			for (i = 0; i < hrefs->len; i++)
-				printf("%d: %s\n", i, veclist_get(hrefs, i)->data);
+			for (i = 0; i < hrefs->len; i++) {
+				href = veclist_get(hrefs, i)->data;
+				href_download(params.url, href, params.output_dir);
+
+			}
 		} else
 			printf("Error: Cannot fetch URL: %s", params.url);
 	else

@@ -15,18 +15,18 @@ typedef struct StrArray_ {
   StrSlice *ptr;
 } StrArray;
 
-typedef enum VecType_ {
-  DB,
-  WORD,
-  DWORD,
-  QWORD,
-} VecType;
+typedef struct Vec_ Vec;
 
-typedef struct Vec_ {
+typedef struct VecExtra_ {
+  Vec *next;
+  Vec *prev;
+} VecExtra;
+
+struct Vec_ {
   size_t len;
-  VecType type;
+  VecExtra extra;
   char data[1];
-} Vec;
+};
 
 typedef struct VecList_ VecList;
 struct VecList_ {
@@ -49,9 +49,12 @@ static inline StrSlice array_get(StrArray *arr, size_t ind);
  */
 bool vec_create(Vec **vec, char *data, size_t data_len);
 
+/* Initializes vlist by malloc
+ */
 static inline bool veclist_init(VecList **vlist, size_t init_alloc);
 static bool veclist_push(VecList **vlist, Vec *v);
 static bool veclist_push_str(VecList **vec_list, char *str);
+static bool veclist_push_zero(VecList **vec_list, size_t size);
 static Vec *veclist_get(VecList *vlist, size_t ind);
 
 #endif
