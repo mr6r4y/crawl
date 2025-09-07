@@ -115,7 +115,6 @@ static inline size_t veclist_free_size(VecList *vlist)
 static bool veclist_push(VecList **vec_list, Vec *v)
 {
 	VecList *vl;
-	VecItem *first;
 	size_t free, vsize;
 	size_t end_delta;
 
