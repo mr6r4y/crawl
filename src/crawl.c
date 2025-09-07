@@ -17,9 +17,8 @@ bool url_validate(char *url)
 	bool match = false;
 
 	/* Compile regular expression */
-	if (regcomp(&regex, "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", REG_EXTENDED)) {
+	if (regcomp(&regex, "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", REG_EXTENDED))
 		return false;
-	}
 
 	/* Execute regular expression */
 	reti = regexec(&regex, url, 0, NULL, 0);
@@ -105,13 +104,63 @@ bool url_fetch(char *url, StrSlice *buf)
 	return success;
 }
 
-bool html_get_uri(StrSlice content, StrArray *uris)
+/* Traverse the document tree */
+void node_traverse_href(TidyDoc doc, TidyNode tnod, VecList **hrefs, int depth)
 {
-	StrSlice curent_uri;
+	TidyNode child;
+	ctmbstr name;
+	TidyAttr attr;
+	char *attr_value;
 
-	array_init(uris);
+	/* Stack overflow protection from recursive abuse */
+	if (depth > 128)
+		return;
 
-	/* TO-DO: .. */
+	for (child = tidyGetChild(tnod); child; child = tidyGetNext(child)) {
+		name = tidyNodeGetName(child);
+		if (name && strcmp("a", name) == 0) {
+			for (attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr))
+				if (strcmp("href", tidyAttrName(attr)) == 0) {
+					attr_value = tidyAttrValue(attr);
+					veclist_push_str(hrefs, attr_value);
+				}
+		}
+		/* Think how to get rid of the recursion */
+		node_traverse_href(doc, child, hrefs, depth + 1); /* recursive */
+	}
+}
 
-	return true;
+int html_get_uri(StrSlice content, VecList **hrefs)
+{
+	veclist_init(hrefs, 512);
+
+	TidyDoc tdoc;
+	TidyBuffer docbuf = { 0 };
+	TidyBuffer tidy_errbuf = { 0 };
+	int err;
+
+	tdoc = tidyCreate();
+	tidyOptSetBool(tdoc, TidyForceOutput, yes); /* try harder */
+	tidyOptSetInt(tdoc, TidyWrapLen, 4096);
+	tidySetErrorBuffer(tdoc, &tidy_errbuf);
+	tidyBufInit(&docbuf);
+
+	tidyBufAppend(&docbuf, content.ptr, content.len);
+
+	err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
+	if (err >= 0) {
+		err = tidyCleanAndRepair(tdoc); /* fix any problems */
+		if (err >= 0) {
+			err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
+			if (err >= 0)
+				node_traverse_href(tdoc, tidyGetRoot(tdoc), hrefs, 0); /* walk the tree */
+		}
+	}
+
+	/* clean-up */
+	tidyBufFree(&docbuf);
+	tidyBufFree(&tidy_errbuf);
+	tidyRelease(tdoc);
+
+	return err;
 }

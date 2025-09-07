@@ -51,6 +51,7 @@ bool vec_create(Vec **vec, char *data, size_t data_len);
 
 static inline bool veclist_init(VecList **vlist, size_t init_alloc);
 static bool veclist_push(VecList **vlist, Vec *v);
+static bool veclist_push_str(VecList **vec_list, char *str);
 static Vec *veclist_get(VecList *vlist, size_t ind);
 
 #endif

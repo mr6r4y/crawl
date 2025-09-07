@@ -113,11 +113,40 @@ static inline size_t veclist_free_size(VecList *vlist)
 	return vlist->alloc - vlist->end;
 }
 
+static bool veclist_push_str(VecList **vec_list, char *str)
+{
+	VecList *vl;
+	Vec *v;
+	size_t free, vsize, str_len;
+
+	vl = *vec_list;
+	free = veclist_free_size(vl);
+	str_len = strlen(str);
+	vsize = sizeof(Vec) + str_len;
+
+	if (free < vsize) {
+		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		if (!vl)
+			return false;
+		*vec_list = vl;
+		vl->alloc += vsize - free + 16;
+	}
+	v = (Vec *)((uintptr_t)vl + vl->end);
+	v->len = str_len;
+	v->type = DB;
+	memcpy(&v->data, str, v->len);
+
+	v->data[v->len] = '\0';
+	vl->end += vec_size(v);
+	vl->len += 1;
+
+	return true;
+}
+
 static bool veclist_push(VecList **vec_list, Vec *v)
 {
 	VecList *vl;
 	size_t free, vsize;
-	size_t end_delta;
 
 	vl = *vec_list;
 	free = veclist_free_size(vl);
