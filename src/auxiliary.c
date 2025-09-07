@@ -82,12 +82,18 @@ bool vec_create(Vec **vec, char *data, size_t data_len)
 	return true;
 }
 
+inline size_t vec_size(Vec *vec)
+{
+	return (size_t)&vec->data + vec->len + 1 - (size_t)vec;
+}
+
 static inline bool veclist_init(VecList **vlist, size_t init_alloc)
 {
 	VecList *vl;
-	size_t alloc;
+	size_t alloc, min_size;
 
-	alloc = init_alloc > sizeof(*vl) ? init_alloc : sizeof(*vl);
+	min_size = sizeof(*vl);
+	alloc = init_alloc > min_size ? init_alloc : min_size;
 	*vlist = malloc(alloc);
 	vl = *vlist;
 
@@ -96,42 +102,37 @@ static inline bool veclist_init(VecList **vlist, size_t init_alloc)
 
 	vl->len = 0;
 	vl->alloc = alloc;
+	vl->end = (size_t)&vl[1] - (size_t)vl;
 
 	return true;
 }
 
+static inline size_t veclist_free_size(VecList *vlist)
+{
+	return vlist->alloc - vlist->end;
+}
+
 static bool veclist_push(VecList **vec_list, Vec *v)
 {
-	Vec *current;
-	VecList *vlist;
-	size_t vlen;
-	size_t vsize = 0;
-	size_t i = 0;
+	VecList *vl;
+	VecItem *first;
+	size_t free, vsize;
+	size_t end_delta;
 
-	vlist = *vec_list;
-	current = &vlist->body[0];
-	vsize += sizeof(*vlist);
-	vsize += (size_t)(&current->data[current->len]) - (size_t)current;
-	while (i < vlist->len) {
-		current = (Vec *)(&current->data[current->len + 1]);
-		vsize += (size_t)(&current->data[current->len]) - (size_t)current;
-		i++;
-	}
+	vl = *vec_list;
+	free = veclist_free_size(vl);
+	vsize = vec_size(v);
 
-	vlen = (size_t)(&v->data[v->len]) - (size_t)v;
-	vsize += vlen;
-
-	if (vlist->alloc < vsize) {
-		vlist->alloc = vsize + 8 - vsize % 8;
-		vlist = realloc(vlist, vlist->alloc);
-		if (!vlist)
+	if (free < vsize) {
+		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		if (!vl)
 			return false;
+		*vec_list = vl;
+		vl->alloc += vsize - free + 16;
 	}
-
-	memcpy(current, v, vlen);
-	vlist->len += 1;
-
-	*vec_list = vlist;
+	memcpy((VecList *)((size_t)vl + vl->end), v, vsize);
+	vl->end += vsize;
+	vl->len += 1;
 
 	return true;
 }
@@ -140,15 +141,15 @@ static Vec *veclist_get(VecList *vlist, size_t ind)
 {
 	Vec *v;
 	size_t i = 0;
+	size_t vsz;
 
 	if (ind >= vlist->len)
 		return NULL;
 
-	v = &vlist->body[0];
+	v = (Vec *)&vlist[1];
 	while (ind != i) {
-		if ((size_t)&v->data + v->len + 1 < (size_t)&v->data)
-			return NULL;
-		v = (Vec *)((size_t)&v->data + v->len + 1);
+		vsz = vec_size(v);
+		v = (Vec *)((size_t)v + vsz);
 
 		i++;
 	}

@@ -28,11 +28,12 @@ typedef struct Vec_ {
   char data[1];
 } Vec;
 
-typedef struct VecList_ {
+typedef struct VecList_ VecList;
+struct VecList_ {
   size_t len;
   size_t alloc;
-  Vec body[1];
-} VecList;
+  size_t end;
+};
 
 StrSlice slice_next_token(StrSlice *slice, char separator);
 static inline bool slice_strcmp(StrSlice slice, const char *other);
@@ -45,7 +46,7 @@ static inline StrSlice array_get(StrArray *arr, size_t ind);
 
 /* Creates a Vec by malloc. Copies data to vec->data.
  * When destroyed use free().
-*/
+ */
 bool vec_create(Vec **vec, char *data, size_t data_len);
 
 static inline bool veclist_init(VecList **vlist, size_t init_alloc);
