@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include "auxiliary.h"
@@ -84,7 +85,7 @@ bool vec_create(Vec **vec, char *data, size_t data_len)
 
 inline size_t vec_size(Vec *vec)
 {
-	return (size_t)&vec->data + vec->len + 1 - (size_t)vec;
+	return (uintptr_t)&vec->data + vec->len + 1 - (uintptr_t)vec;
 }
 
 static inline bool veclist_init(VecList **vlist, size_t init_alloc)
@@ -102,7 +103,7 @@ static inline bool veclist_init(VecList **vlist, size_t init_alloc)
 
 	vl->len = 0;
 	vl->alloc = alloc;
-	vl->end = (size_t)&vl[1] - (size_t)vl;
+	vl->end = (uintptr_t)&vl[1] - (uintptr_t)vl;
 
 	return true;
 }
@@ -129,7 +130,7 @@ static bool veclist_push(VecList **vec_list, Vec *v)
 		*vec_list = vl;
 		vl->alloc += vsize - free + 16;
 	}
-	memcpy((VecList *)((size_t)vl + vl->end), v, vsize);
+	memcpy((VecList *)((uintptr_t)vl + vl->end), v, vsize);
 	vl->end += vsize;
 	vl->len += 1;
 
@@ -148,7 +149,7 @@ static Vec *veclist_get(VecList *vlist, size_t ind)
 	v = (Vec *)&vlist[1];
 	while (ind != i) {
 		vsz = vec_size(v);
-		v = (Vec *)((size_t)v + vsz);
+		v = (Vec *)((uintptr_t)v + vsz);
 
 		i++;
 	}
