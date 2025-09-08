@@ -205,6 +205,7 @@ void crawl_run(char *url, char *output_dir)
 				href_download(url, href, output_dir);
 			}
 			free(fetch_buf.ptr);
+			free(hrefs);
 		} else
 			printf("Error: Cannot fetch URL: %s", url);
 	else
