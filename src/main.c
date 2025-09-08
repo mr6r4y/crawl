@@ -48,19 +48,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 int main(int argc, char **argv)
 {
-	StrSlice fetch_buf;
 	Parameters params;
-	VecList *hrefs;
-	char *href;
 
 	/* Default arguments */
 	params.version = 0;
 	params.output_dir = "out";
 	params.url = "";
 	/* ----------------- */
-
-	int remaining = 0;
-	int i = 0;
 
 	struct argp_option options[] = {
 		{ "version", 'v', NULL, 0, "Print version string" },
@@ -79,19 +73,7 @@ int main(int argc, char **argv)
 	printf("URL: %s\n", params.url);
 	printf("Output-Dir: %s\n", params.output_dir);
 
-	if (url_validate(params.url))
-		if (url_fetch(params.url, &fetch_buf)) {
-			html_get_href(fetch_buf, &hrefs);
-			/* Hrefs in VecList */
-			for (i = 0; i < hrefs->len; i++) {
-				href = veclist_get(hrefs, i)->data;
-				href_download(params.url, href, params.output_dir);
-
-			}
-		} else
-			printf("Error: Cannot fetch URL: %s", params.url);
-	else
-		printf("Error: Invalid URL: %s", params.url);
+	crawl_run(params.url, params.output_dir);
 
 	return EXIT_SUCCESS;
 }

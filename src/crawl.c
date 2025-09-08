@@ -169,22 +169,44 @@ void href_download(char *url, char *href, char *outdir)
 	if (href[0] == '?')
 		return;
 
-	if (url[strlen(url) - 1] == '/') {
-		ulen = strlen(url) + strlen(href);
-		vec_create(&v, url, ulen);
-		strcat(v->data, href);
-	} else {
-		ulen = strlen(url) + strlen(href) + 1;
-		vec_create(&v, url, ulen);
+	ulen = strlen(url) + strlen(href) + 1;
+	vec_create(&v, url, ulen);
+	if (url[strlen(url) - 1 != '/'])
 		strcat(v->data, "/");
+	if (href[0] != '/')
 		strcat(v->data, href);
-	}
+	else
+		return;
+	// TO-DO: Handle absolute href
 
 	if (v->data[v->len - 1] == '/') {
 		// TO-DO: Recurse into new outdir
 		printf("Directory: %s\n", v->data);
+		crawl_run(v->data, outdir);
 	} else {
 		// TO-DO: Download file
 		printf("File: %s\n", v->data);
 	}
+}
+
+void crawl_run(char *url, char *output_dir)
+{
+	StrSlice fetch_buf;
+	VecList *hrefs;
+	char *href;
+	size_t i;
+
+	if (url_validate(url))
+		if (url_fetch(url, &fetch_buf)) {
+			html_get_href(fetch_buf, &hrefs);
+			/* Hrefs in VecList */
+			for (i = 0; i < hrefs->len; i++) {
+				href = veclist_get(hrefs, i)->data;
+				href_download(url, href, output_dir);
+			}
+			free(fetch_buf.ptr);
+		} else
+			printf("Error: Cannot fetch URL: %s", url);
+	else
+		printf("Error: Invalid URL: %s", url);
 }

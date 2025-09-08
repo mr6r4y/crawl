@@ -18,8 +18,8 @@ typedef struct StrArray_ {
 typedef struct Vec_ Vec;
 
 typedef struct VecExtra_ {
-  Vec *next;
-  Vec *prev;
+  size_t next;
+  size_t prev;
 } VecExtra;
 
 struct Vec_ {
