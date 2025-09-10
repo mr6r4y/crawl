@@ -1,4 +1,5 @@
 build/
+dumps/
 CMakeUserPresets.json
 ctags-files.txt
 tags
