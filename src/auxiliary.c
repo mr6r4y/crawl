@@ -89,7 +89,7 @@ inline size_t vec_size(Vec *vec)
 	return (uintptr_t)&vec->data + vec->len + 1 - (uintptr_t)vec;
 }
 
-static inline bool veclist_init(VecList **vlist, size_t init_alloc)
+static inline bool veclist_init(VecList **vlist, size_t init_alloc, size_t realloc_step)
 {
 	VecList *vl;
 	size_t alloc, min_size;
@@ -104,6 +104,7 @@ static inline bool veclist_init(VecList **vlist, size_t init_alloc)
 
 	vl->len = 0;
 	vl->alloc = alloc;
+	vl->realloc_step = realloc_step;
 	vl->end = (uintptr_t)&vl[1] - (uintptr_t)vl;
 
 	return true;
@@ -126,7 +127,7 @@ static bool veclist_push_str(VecList **vec_list, char *str)
 	vsize = sizeof(Vec) + str_len + 1;
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
 		if (!vl)
 			return false;
 		*vec_list = vl;
@@ -154,7 +155,7 @@ static bool veclist_push_zero(VecList **vec_list, size_t size)
 	vsize = sizeof(Vec) + size + 1;
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
 		if (!vl)
 			return false;
 		*vec_list = vl;
@@ -179,7 +180,7 @@ static bool veclist_push(VecList **vec_list, Vec *v)
 	vsize = vec_size(v);
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + 16);
+		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
 		if (!vl)
 			return false;
 		*vec_list = vl;

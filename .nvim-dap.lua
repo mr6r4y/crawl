@@ -26,7 +26,8 @@ dap.configurations.c = {
 
 		program = vim.fs.normalize("build/Debug/crawl"), -- This configuration will launch the current file if used
 		-- args = { "-o", "out/", "https://c-faq.com/decl/index.html" },
-		args = { "https://c-faq.com/decl/index.html" },
+		-- args = { "https://c-faq.com/decl/index.html" },
+		args = { "https://www.cl.cam.ac.uk/~mgk25/ucs/" },
 	},
 	{
 		-- The first three options are required by nvim-dap

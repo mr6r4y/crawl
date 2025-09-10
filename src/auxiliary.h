@@ -15,23 +15,25 @@ typedef struct StrArray_ {
   StrSlice *ptr;
 } StrArray;
 
-typedef struct Vec_ Vec;
-
 typedef struct VecExtra_ {
   size_t next;
   size_t prev;
 } VecExtra;
 
-struct Vec_ {
+typedef struct Vec_ {
   size_t len;
-  VecExtra extra;
+  struct _ {
+    size_t next;
+    size_t prev;
+  } extra;
   char data[1];
-};
+} Vec;
 
 typedef struct VecList_ VecList;
 struct VecList_ {
   size_t len;
   size_t alloc;
+  size_t realloc_step;
   size_t end;
 };
 
@@ -48,10 +50,11 @@ static inline StrSlice array_get(StrArray *arr, size_t ind);
  * When destroyed use free().
  */
 bool vec_create(Vec **vec, char *data, size_t data_len);
+inline size_t vec_size(Vec *vec);
 
 /* Initializes vlist by malloc
  */
-static inline bool veclist_init(VecList **vlist, size_t init_alloc);
+static inline bool veclist_init(VecList **vlist, size_t init_alloc, size_t realloc_step);
 static bool veclist_push(VecList **vlist, Vec *v);
 static bool veclist_push_str(VecList **vec_list, char *str);
 static bool veclist_push_zero(VecList **vec_list, size_t size);

@@ -12,7 +12,7 @@ int main()
 	int i = 0;
 	VecList *vl;
 
-	veclist_init(&vl, 64);
+	veclist_init(&vl, 64, 512);
 
 	for (i = 0; i < N; i++)
 		vec_create(&vec[i], s, strlen(s));

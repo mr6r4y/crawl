@@ -132,7 +132,7 @@ void node_traverse_href(TidyDoc doc, TidyNode tnod, VecList **hrefs, int depth)
 
 int html_get_href(StrSlice content, VecList **hrefs)
 {
-	veclist_init(hrefs, 512);
+	veclist_init(hrefs, 1024, 1024);
 
 	TidyDoc tdoc;
 	TidyBuffer docbuf = { 0 };
