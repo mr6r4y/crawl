@@ -217,7 +217,7 @@ static Vec *veclist_get(VecList *vlist, size_t ind)
 # define PATH_SEP "/"
 #endif
 
-static char *path_join(VecList *paths)
+static char *veclist_path_join(VecList *paths)
 {
 	char *s;
 	Vec *v;
