@@ -26,7 +26,7 @@ typedef struct Vec_ {
     size_t next;
     size_t prev;
   } extra;
-  char data[1];
+  char data[0];
 } Vec;
 
 typedef struct VecList_ VecList;
@@ -50,7 +50,7 @@ static inline StrSlice array_get(StrArray *arr, size_t ind);
  * When destroyed use free().
  */
 bool vec_create(Vec **vec, char *data, size_t data_len);
-inline size_t vec_size(Vec *vec);
+static inline size_t vec_size(Vec *vec);
 
 /* Initializes vlist by malloc
  */
@@ -59,5 +59,7 @@ static bool veclist_push(VecList **vlist, Vec *v);
 static bool veclist_push_str(VecList **vec_list, char *str);
 static bool veclist_push_zero(VecList **vec_list, size_t size);
 static Vec *veclist_get(VecList *vlist, size_t ind);
+
+static char *path_join(VecList *paths);
 
 #endif

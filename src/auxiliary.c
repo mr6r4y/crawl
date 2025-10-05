@@ -84,7 +84,7 @@ bool vec_create(Vec **vec, char *data, size_t data_len)
 	return true;
 }
 
-inline size_t vec_size(Vec *vec)
+static inline size_t vec_size(Vec *vec)
 {
 	return (uintptr_t)&vec->data + vec->len + 1 - (uintptr_t)vec;
 }
@@ -211,4 +211,29 @@ static Vec *veclist_get(VecList *vlist, size_t ind)
 	}
 
 	return v;
+}
+
+#ifndef PATH_SEP
+# define PATH_SEP "/"
+#endif
+
+static char *path_join(VecList *paths)
+{
+	char *s;
+	Vec *v;
+	size_t i, sl;
+
+	sl = paths->end + strlen(PATH_SEP) * (paths->len - 1) - (paths->len * sizeof(Vec)) + 1;
+	s = malloc(sl);
+	s[sl - 1] = '\0';
+
+	for (i = 0; i < paths->len - 1; i++) {
+		v = veclist_get(paths, i);
+		strcat(s, v->data);
+		strcat(s, PATH_SEP);
+	}
+	v = veclist_get(paths, i);
+	strcat(s, v->data);
+
+	return s;
 }
