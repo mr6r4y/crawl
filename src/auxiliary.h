@@ -61,5 +61,6 @@ static bool veclist_push_zero(VecList **vec_list, size_t size);
 static Vec *veclist_get(VecList *vlist, size_t ind);
 
 static char *veclist_path_join(VecList *paths);
+static char *str_path_join(char *path_1, char *path_2);
 
 #endif

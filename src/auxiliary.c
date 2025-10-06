@@ -225,7 +225,7 @@ static char *veclist_path_join(VecList *paths)
 
 	sl = paths->end + strlen(PATH_SEP) * (paths->len - 1) - (paths->len * sizeof(Vec)) + 1;
 	s = malloc(sl);
-	s[sl - 1] = '\0';
+	s[0] = '\0';
 
 	for (i = 0; i < paths->len - 1; i++) {
 		v = veclist_get(paths, i);
@@ -234,6 +234,21 @@ static char *veclist_path_join(VecList *paths)
 	}
 	v = veclist_get(paths, i);
 	strcat(s, v->data);
+
+	return s;
+}
+
+static char *str_path_join(char *path_1, char *path_2)
+{
+	char *s;
+	size_t sl;
+
+	sl = strlen(path_1) + strlen(path_2) + strlen(PATH_SEP);
+	s = malloc(sl + 1);
+	s[0] = '\0';
+	strcat(s, path_1);
+	strcat(s, PATH_SEP);
+	strcat(s, path_2);
 
 	return s;
 }
