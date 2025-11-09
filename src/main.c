@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 	argp_parse(&argp, argc, argv, 0, 0, &params);
 	printf("URL: %s\n", params.url);
 	printf("Output-Dir: %s\n", params.output_dir);
-
+	create_dir(params.output_dir);
 	crawl_run(params.url, params.output_dir);
 
 	return EXIT_SUCCESS;

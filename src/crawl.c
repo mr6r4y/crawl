@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
+#include <libgen.h>
 
+#include "auxiliary.h"
 #include "tidy.h"
 #include "tidybuffio.h"
 #include "curl/curl.h"
@@ -161,10 +163,77 @@ int html_get_href(StrSlice content, VecList **hrefs)
 	return err;
 }
 
+static size_t curl_write_clb_save_to_file(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+	return written;
+}
+
+int href_download_file(const char *url, const char *outdir)
+{
+	char *filename;
+	char *path;
+	CURLcode res;
+	CURL *curl;
+	FILE *file;
+
+	filename = basename(url);
+	path = str_path_join(outdir, filename);
+	printf("download to path: %s\n", path);
+
+	res = curl_global_init(CURL_GLOBAL_ALL);
+	if (res) {
+		fprintf(stderr, "Could not init curl\n");
+		return (int)res;
+	}
+
+	/* init the curl session */
+	curl = curl_easy_init();
+	if (curl) {
+		/* set URL to get here */
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		/* Switch on full protocol/debug output while testing */
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+		/* disable progress meter, set to 0L to enable it */
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+		/* send all data to this function  */
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_clb_save_to_file);
+		/* open the file */
+		file = fopen(path, "wb");
+		if (file) {
+			/* write the page body to this file handle */
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+			/* get it! */
+			res = curl_easy_perform(curl);
+			/* close the header file */
+			fclose(file);
+		}
+		/* cleanup curl stuff */
+		curl_easy_cleanup(curl);
+	}
+
+	curl_global_cleanup();
+
+	return (int)res;
+
+	return 0;
+}
+
+int create_dir(const char *path)
+{
+	struct stat st = { 0 };
+
+	if (stat(path, &st) == -1)
+		return mkdir(path, 0755);
+	return -1;
+}
+
 void href_download(char *url, char *href, char *outdir)
 {
 	size_t ulen;
 	Vec *v;
+	char *new_output_dir;
+	struct stat st = { 0 };
 
 	if (href[0] == '?')
 		return;
@@ -180,12 +249,13 @@ void href_download(char *url, char *href, char *outdir)
 	// TO-DO: Handle absolute href
 
 	if (v->data[v->len - 1] == '/') {
-		// TO-DO: Recurse into new outdir
 		printf("Directory: %s\n", v->data);
-		crawl_run(v->data, outdir);
+		new_output_dir = str_path_join(outdir, href);
+		create_dir(new_output_dir);
+		crawl_run(v->data, new_output_dir);
+		free(new_output_dir);
 	} else {
-		// TO-DO: Download file
-		printf("File: %s\n", v->data);
+		href_download_file(v->data, outdir);
 	}
 }
 
