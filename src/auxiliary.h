@@ -15,11 +15,6 @@ typedef struct StrArray_ {
   StrSlice *ptr;
 } StrArray;
 
-typedef struct VecExtra_ {
-  size_t next;
-  size_t prev;
-} VecExtra;
-
 typedef struct Vec_ {
   size_t len;
   struct _ {
@@ -59,6 +54,7 @@ static bool veclist_push(VecList **vlist, Vec *v);
 static bool veclist_push_str(VecList **vec_list, char *str);
 static bool veclist_push_zero(VecList **vec_list, size_t size);
 static Vec *veclist_get(VecList *vlist, size_t ind);
+static void veclist_clear(VecList *vec_list);
 
 static char *veclist_path_join(VecList *paths);
 static char *str_path_join(char *path_1, char *path_2);

@@ -119,7 +119,7 @@ static bool veclist_push_str(VecList **vec_list, char *str)
 {
 	VecList *vl;
 	Vec *v;
-	size_t free, vsize, str_len;
+	size_t free, vsize, str_len, extra_alloc;
 
 	vl = *vec_list;
 	free = veclist_free_size(vl);
@@ -127,11 +127,12 @@ static bool veclist_push_str(VecList **vec_list, char *str)
 	vsize = sizeof(Vec) + str_len + 1;
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
+		extra_alloc = vsize - free + vl->realloc_step;
+		vl = realloc(vl, vl->alloc + extra_alloc);
 		if (!vl)
 			return false;
 		*vec_list = vl;
-		vl->alloc += vsize - free + 16;
+		vl->alloc += extra_alloc;
 	}
 	v = (Vec *)((uintptr_t)vl + vl->end);
 	v->len = str_len;
@@ -148,18 +149,19 @@ static bool veclist_push_zero(VecList **vec_list, size_t size)
 {
 	VecList *vl;
 	Vec *v;
-	size_t free, vsize;
+	size_t free, vsize, extra_alloc;
 
 	vl = *vec_list;
 	free = veclist_free_size(vl);
 	vsize = sizeof(Vec) + size + 1;
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
+		extra_alloc = vsize - free + vl->realloc_step;
+		vl = realloc(vl, vl->alloc + extra_alloc);
 		if (!vl)
 			return false;
 		*vec_list = vl;
-		vl->alloc += vsize - free + 16;
+		vl->alloc += extra_alloc;
 	}
 	v = (Vec *)((uintptr_t)vl + vl->end);
 	v->len = size;
@@ -173,18 +175,19 @@ static bool veclist_push_zero(VecList **vec_list, size_t size)
 static bool veclist_push(VecList **vec_list, Vec *v)
 {
 	VecList *vl;
-	size_t free, vsize;
+	size_t free, vsize, extra_alloc;
 
 	vl = *vec_list;
 	free = veclist_free_size(vl);
 	vsize = vec_size(v);
 
 	if (free < vsize) {
-		vl = realloc(vl, vl->alloc + vsize - free + vl->realloc_step);
+		extra_alloc = vsize - free + vl->realloc_step;
+		vl = realloc(vl, vl->alloc + extra_alloc);
 		if (!vl)
 			return false;
 		*vec_list = vl;
-		vl->alloc += vsize - free + 16;
+		vl->alloc += extra_alloc;
 	}
 	memcpy((VecList *)((uintptr_t)vl + vl->end), v, vsize);
 	vl->end += vsize;
@@ -211,6 +214,12 @@ static Vec *veclist_get(VecList *vlist, size_t ind)
 	}
 
 	return v;
+}
+
+static void veclist_clear(VecList *vec_list)
+{
+	vec_list->len = 0;
+	vec_list->end = (uintptr_t)&vec_list[1] - (uintptr_t)vec_list;
 }
 
 #ifndef PATH_SEP
